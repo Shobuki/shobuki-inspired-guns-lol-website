@@ -2,21 +2,35 @@
 import React from "react";
 import ClockSteampunk from "@/components/clock";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function Page() {
   return (
     <main className="min-h-dvh bg-black text-white pt-16 md:pt-20">
-      <section className="mx-auto max-w-6xl px-4 md:px-6 py-10 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <section className="w-full px-4 md:px-8 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
           {/* Kolom 1: Jam */}
-          <div className="flex items-start justify-center md:justify-start">
-            <div className="w-64 sm:w-72 md:w-80 lg:w-96">
-              <ClockSteampunk size="100%" smoothSeconds={false} />
+          <motion.div
+            className="flex justify-center"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="w-72 md:w-80 lg:w-96 p-4 rounded-2xl bg-black/40 ring-1 ring-white/10 shadow-lg shadow-black/50">
+              <ClockSteampunk size="100%" />
             </div>
-          </div>
+          </motion.div>
 
-          {/* Kolom 2: Roblox, Steam, Spotify, Discord */}
-          <div className="flex flex-col gap-4 self-center md:self-start">
+          {/* Kolom 2: Social Links */}
+          <motion.div
+            className="flex flex-col gap-5 items-center text-center"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.2 }}
+          >
+            <h2 className="text-lg font-semibold text-white/80 mb-2">
+              Find me on
+            </h2>
             <SocialLink href="#" bg="bg-[#E2231A]" text="Roblox" sub="Profile">
               <RobloxIcon />
             </SocialLink>
@@ -29,14 +43,40 @@ export default function Page() {
             <SocialLink href="#" bg="bg-[#5865F2]" text="Discord" sub="Contact">
               <DiscordIcon />
             </SocialLink>
-          </div>
+          </motion.div>
+
+          {/* Kolom 3: Video */}
+          <motion.div
+            className="relative w-full max-w-md mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-lg shadow-black/40"
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <video
+              src="/wallpaper/hollow.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-cover"
+            />
+            {/* Overlay biar lebih menyatu */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+          </motion.div>
         </div>
       </section>
     </main>
   );
 }
 
-function SocialLink({ href, bg, text, sub, children }: {
+function SocialLink({
+  href,
+  bg,
+  text,
+  sub,
+  children,
+}: {
   href: string;
   bg: string;
   text: string;
@@ -46,18 +86,22 @@ function SocialLink({ href, bg, text, sub, children }: {
   return (
     <Link
       href={href}
-      className={`group ${bg} rounded-xl px-4 py-3 flex items-center gap-4 shadow-md shadow-black/40 hover:brightness-110 transition-transform hover:-translate-y-0.5 active:translate-y-0`}
+      className={`group ${bg} rounded-xl px-4 py-3 flex items-center gap-4 shadow-md shadow-black/40 hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all`}
       target="_blank"
       rel="noopener noreferrer"
     >
       <span className="shrink-0 inline-flex items-center justify-center size-9 rounded-lg bg-black/20 ring-1 ring-white/10">
         {children}
       </span>
-      <span className="flex flex-col">
+      <span className="flex flex-col text-left">
         <span className="font-semibold leading-tight">{text}</span>
-        {sub ? <span className="text-xs text-white/70 leading-tight">{sub}</span> : null}
+        {sub ? (
+          <span className="text-xs text-white/70 leading-tight">{sub}</span>
+        ) : null}
       </span>
-      <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-white/80">↗</span>
+      <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-white/80">
+        ↗
+      </span>
     </Link>
   );
 }

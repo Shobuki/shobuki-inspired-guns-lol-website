@@ -197,7 +197,6 @@ export default function Header() {
               Shobuki
             </Link>
             <div className="ml-3 size-8 md:size-9 mb-5" aria-hidden>
-              <ClockSteampunk size={60} smoothSeconds={false} />
             </div>
           </div>
 
