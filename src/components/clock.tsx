@@ -46,7 +46,11 @@ function makeFullCycloidalGearMarkup(opts: {
     for (let i = 0; i < 22; i++) {
       const m = (a + b) / 2;
       const [x, y] = fn(m);
-      (Math.hypot(x, y) > target) ? (b = m) : (a = m);
+      if (Math.hypot(x, y) > target) {
+        b = m;
+      } else {
+        a = m;
+      }
     }
     return (a + b) / 2;
   };
@@ -517,8 +521,8 @@ function ClockSteampunk({
   // Pause SMIL saat tab hidden
   useEffect(() => {
     const onVis = () => {
-      const svg = svgRef.current as any;
-      if (!svg || typeof svg.pauseAnimations !== "function") return;
+      const svg = svgRef.current;
+      if (!svg) return;
       if (document.visibilityState === "hidden") svg.pauseAnimations();
       else svg.unpauseAnimations();
     };

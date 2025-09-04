@@ -7,6 +7,12 @@ type KeyMap = Record<string, boolean>;
 type Zombie = { id: number; group: THREE.Group; hp: number; speed: number };
 type Obstacle = { mesh: THREE.Mesh; pos: THREE.Vector3; hx: number; hz: number };
 
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
+
 const SETTINGS = {
   playerHeight: 1.7,
   playerRadius: 0.38,
@@ -81,9 +87,9 @@ export default function ZombieFPS() {
   const masterGainRef = useRef<GainNode | null>(null);
   const ensureAudio = () => {
     if (!audioCtxRef.current) {
-      const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
-      if (!Ctx) return;
-      const ctx: AudioContext = new Ctx();
+      const CtxCtor = typeof AudioContext !== "undefined" ? AudioContext : window.webkitAudioContext;
+      if (!CtxCtor) return;
+      const ctx: AudioContext = new CtxCtor();
       const gain = ctx.createGain();
       gain.gain.value = 0.25;
       gain.connect(ctx.destination);
@@ -156,7 +162,7 @@ export default function ZombieFPS() {
     );
     ground.rotation.x = -Math.PI / 2; ground.position.y = 0; scene.add(ground);
     const grid = new THREE.GridHelper(200, 100, 0x222, 0x222);
-    (grid.material as THREE.Material as any).transparent = true;
+    (grid.material as THREE.Material).transparent = true;
     (grid.material as THREE.Material).opacity = 0.15; scene.add(grid);
     const wallMat = new THREE.MeshBasicMaterial({ color: 0x111114 });
     const wallGeo = new THREE.BoxGeometry(SETTINGS.mapHalfSize * 2, 5, 0.5);
@@ -244,7 +250,9 @@ export default function ZombieFPS() {
     spawnWave(1);
 
     // Raycaster
-    const raycaster = new THREE.Raycaster(); (raycaster as any).camera = camera;
+    const raycaster = new THREE.Raycaster();
+    type RaycasterWithCamera = THREE.Raycaster & { camera?: THREE.Camera };
+    (raycaster as RaycasterWithCamera).camera = camera;
 
     // Resize
     const onResize = () => {
@@ -311,25 +319,24 @@ export default function ZombieFPS() {
     window.addEventListener("keyup", onKeyUp);
 
     // Mouse / Pointer look
-    const onPointerMove = (e: PointerEvent | MouseEvent) => {
+    const onPointerMove = (e: PointerEvent) => {
       // Touch-look handled separately
       if (isTouchDevice()) return;
 
       if (lockedRef.current) {
-        yaw -= (e as PointerEvent).movementX * SETTINGS.mouseSensitivity;
-        pitch -= (e as PointerEvent).movementY * SETTINGS.mouseSensitivity;
+        yaw -= e.movementX * SETTINGS.mouseSensitivity;
+        pitch -= e.movementY * SETTINGS.mouseSensitivity;
       } else if (dragActiveRef.current) {
-        const me = e as MouseEvent;
-        const dx = me.clientX - lastXYRef.current.x;
-        const dy = me.clientY - lastXYRef.current.y;
-        lastXYRef.current = { x: me.clientX, y: me.clientY };
+        const dx = e.clientX - lastXYRef.current.x;
+        const dy = e.clientY - lastXYRef.current.y;
+        lastXYRef.current = { x: e.clientX, y: e.clientY };
         yaw -= dx * SETTINGS.mouseSensitivity;
         pitch -= dy * SETTINGS.mouseSensitivity;
       } else return;
 
       pitch = Math.max(-Math.PI / 2 + 0.02, Math.min(Math.PI / 2 - 0.02, pitch));
     };
-    window.addEventListener("pointermove", onPointerMove as any);
+    window.addEventListener("pointermove", onPointerMove);
 
     // Click to (re)lock OR shoot
     const tryPointerLock = () => {
@@ -456,7 +463,16 @@ export default function ZombieFPS() {
           const blood = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6),
             new THREE.MeshBasicMaterial({ color: 0x9c1a1a }));
           blood.position.copy(hits[0].point); scene.add(blood);
-          setTimeout(() => { scene.remove(blood); blood.geometry.dispose(); (blood.material as any).dispose?.(); }, 120);
+          setTimeout(() => {
+            scene.remove(blood);
+            blood.geometry.dispose();
+            const mat = blood.material as THREE.Material | THREE.Material[];
+            if (Array.isArray(mat)) {
+              mat.forEach((m) => m.dispose?.());
+            } else {
+              mat.dispose?.();
+            }
+          }, 120);
         }
       }
     };
@@ -579,6 +595,7 @@ export default function ZombieFPS() {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("mousedown", onMouseDown);
       canvas.removeEventListener("touchstart", handleTouchStart);
       canvas.removeEventListener("touchmove", handleTouchMove);
@@ -588,9 +605,12 @@ export default function ZombieFPS() {
       canvas.removeEventListener("touchmove", onTouchMove);
       renderer.dispose();
       scene.traverse((obj) => {
-        const m = (obj as any).material; const g = (obj as any).geometry;
-        if (m && m.dispose) m.dispose();
-        if (g && g.dispose) g.dispose();
+        const mesh = obj as THREE.Mesh;
+        const m = mesh.material as THREE.Material | THREE.Material[] | undefined;
+        const g = (mesh as any).geometry as THREE.BufferGeometry | undefined;
+        if (Array.isArray(m)) m.forEach((mm) => mm.dispose?.());
+        else m?.dispose?.();
+        g?.dispose?.();
       });
     };
   }, []);
@@ -648,11 +668,11 @@ export default function ZombieFPS() {
 
   // Bridge for mobile buttons to internal closures
   useEffect(() => {
-    const shootListener = (e: any) => {
+    const shootListener: EventListener = () => {
       // no-op here; just to prevent error if none registered
     };
-    window.addEventListener("zfps-shoot", shootListener as any);
-    return () => { window.removeEventListener("zfps-shoot", shootListener as any); };
+    window.addEventListener("zfps-shoot", shootListener);
+    return () => { window.removeEventListener("zfps-shoot", shootListener); };
   }, []);
 
   // Register handlers into the running effect (once DOM/scene exists)

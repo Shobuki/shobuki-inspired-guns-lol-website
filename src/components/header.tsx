@@ -2,41 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link"
-import ClockSteampunk from "./clock"
 import ZombieFPS from "@/components/ZombieFPS";
 
 
-// ───────────────────────────────────────────────────────────────────────────────
-// Kurumi clock kecil (tanpa perubahan besar)
-function KurumiClockBadge() {
-  return (
-    <div className="relative size-8 md:size-9 ml-3" aria-hidden="true" title="Kurumi gold clock">
-      <svg viewBox="0 0 100 100" className="absolute inset-0" style={{ animation: "spin 10s linear infinite" }}>
-        <circle cx="50" cy="50" r="42" fill="none" stroke="#D4AF37" strokeWidth="3" />
-        {Array.from({ length: 12 }).map((_, i) => {
-          const a = (i * Math.PI) / 6
-          const x1 = 50 + Math.cos(a) * 36
-          const y1 = 50 + Math.sin(a) * 36
-          const x2 = 50 + Math.cos(a) * 42
-          const y2 = 50 + Math.sin(a) * 42
-          return (
-            <line
-              key={i}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#D4AF37"
-              strokeWidth={i % 3 === 0 ? 3 : 1.5}
-              strokeLinecap="round"
-            />
-          )
-        })}
-        <circle cx="50" cy="50" r="2.5" fill="#D4AF37" />
-      </svg>
-    </div>
-  )
-}
+// (removed unused mini clock badge)
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Header dengan transisi super halus
@@ -235,7 +204,9 @@ export default function Header() {
       >
         <button
           onClick={() => {
-            try { (document as any).exitPointerLock?.(); } catch {}
+            try {
+              (document as Document & { exitPointerLock?: () => void }).exitPointerLock?.();
+            } catch {}
             setShowZombie(false);
           }}
           className="absolute top-4 right-4 z-[1000] px-3 py-1.5 rounded-md bg-white/90 text-black font-semibold hover:bg-white"

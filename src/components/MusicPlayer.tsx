@@ -53,7 +53,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ inline = false }) => {
   // responsive max height for playlist
   const [listMax, setListMax] = useState<number>(280);
 
-  const playerRef = useRef<any>(null);
+  type YTPlayer = Parameters<NonNullable<YouTubeProps["onReady"]>>[0]["target"];
+  const playerRef = useRef<YTPlayer | null>(null);
   const ticker = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const cur = playlist[idx];
