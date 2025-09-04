@@ -120,3 +120,40 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ===== Lenis integration (prevent CSS scroll-behavior conflicts) ===== */
+html.lenis {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+/* ===== Kurumi-styled scrollbars (global) ===== */
+/* WebKit (Chrome/Edge/Safari) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: #0b0b0d;
+}
+*::-webkit-scrollbar-thumb {
+  /* match header maroon tone */
+  background: #6a0f15;
+  border-radius: 8px;
+  box-shadow: inset 0 0 6px rgba(106, 15, 21, .35);
+  border: 2px solid #0b0b0d;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #8c1b23;
+}
+*::-webkit-scrollbar-thumb:active {
+  background: #a2242d;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6a0f15 #0b0b0d; /* header maroon on black track */
+}

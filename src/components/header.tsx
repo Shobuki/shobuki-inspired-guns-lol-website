@@ -1,7 +1,10 @@
 "use client"
 
+import React, { useEffect, useState } from "react";
 import Link from "next/link"
 import ClockSteampunk from "./clock"
+import ZombieFPS from "@/components/ZombieFPS";
+
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Kurumi clock kecil (tanpa perubahan besar)
@@ -31,10 +34,6 @@ function KurumiClockBadge() {
         })}
         <circle cx="50" cy="50" r="2.5" fill="#D4AF37" />
       </svg>
-      <style jsx>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (prefers-reduced-motion: reduce) { :global(svg[style]) { animation: none !important; } }
-      `}</style>
     </div>
   )
 }
@@ -42,6 +41,13 @@ function KurumiClockBadge() {
 // ───────────────────────────────────────────────────────────────────────────────
 // Header dengan transisi super halus
 export default function Header() {
+  const [showZombie, setShowZombie] = useState(false);
+  // Lock background scroll when modal open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    if (showZombie) document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [showZombie]);
   // batas vertikal merah (panel merah tidak boleh melewati ini)
   const dividerX = "56%"           // bisa ganti ke "600px" kalau mau fixed
   // lebar video (harus sama dengan class width di bawah)
@@ -56,7 +62,7 @@ export default function Header() {
   const maroonMid    = "color-mix(in oklab, #4d0c12 74%, #000 26%)"
   const maroonDark   = "color-mix(in oklab, #160809 50%, #000 50%)"
 
-  return (
+  return (<>
     <header className="fixed top-0 left-0 w-full z-50 h-16 md:h-20 border-b border-white/5 bg-black">
       <div className="relative h-full flex items-center justify-between px-4 md:px-6 overflow-hidden">
 
@@ -201,12 +207,47 @@ export default function Header() {
           </div>
 
           <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-white/85">
-            <Link href="#about" className="hover:text-white transition-colors">About</Link>
-            <Link href="#projects" className="hover:text-white transition-colors">Projects</Link>
-            <Link href="#contact" className="hover:text-white transition-colors">Contact</Link>
+            <button
+              onClick={() => setShowZombie(true)}
+              className="px-3 py-1.5 rounded-md bg-[#6a0f15] text-white/95 hover:bg-[#8c1b23] ring-1 ring-white/10 transition"
+              title="Play Zombie FPS"
+            >
+              Zombie FPS
+            </button>
           </nav>
+          <button
+            onClick={() => setShowZombie(true)}
+            className="sm:hidden px-3 py-1.5 rounded-md bg-[#6a0f15] text-white/95 ring-1 ring-white/10"
+            title="Play Zombie FPS"
+          >
+            Zombie
+          </button>
         </div>
       </div>
     </header>
-  )
+    {/* Modal: Zombie FPS */}
+    {showZombie && (
+      <div
+        className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm"
+        aria-modal="true"
+        role="dialog"
+        data-lenis-prevent
+      >
+        <button
+          onClick={() => setShowZombie(false)}
+          className="absolute top-4 right-4 px-3 py-1.5 rounded-md bg-white/90 text-black font-semibold hover:bg-white"
+          aria-label="Close"
+        >
+          Close
+        </button>
+        <div className="absolute inset-0 overflow-auto">
+          <div className="min-h-full w-full flex items-center justify-center p-4">
+            <div className="w-full max-w-5xl">
+              <ZombieFPS />
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </>)
 }
