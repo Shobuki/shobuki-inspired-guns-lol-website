@@ -51,6 +51,7 @@ export default function ZombieFPS() {
   const [ready, setReady] = useState(false);
   const [locked, setLocked] = useState(false);
   const [started, setStarted] = useState(false);
+  const startedRef = useRef(false);
   const [paused, setPaused] = useState(false);
   const [health, setHealth] = useState<number>(SETTINGS.maxHealth);
   const [wave, setWave] = useState(1);
@@ -344,7 +345,7 @@ export default function ZombieFPS() {
       try { canvas.requestPointerLock(); } catch { }
     };
     const onMouseDown = (e: MouseEvent) => {
-      if (!started) setStarted(true);
+      if (!startedRef.current) { setStarted(true); startedRef.current = true; }
       ensureAudio();
       if (!lockedRef.current) {
         tryPointerLock();
@@ -361,7 +362,7 @@ export default function ZombieFPS() {
       leftStart: { x: 0, y: 0 }, rightStart: { x: 0, y: 0 },
     };
     const handleTouchStart = (e: TouchEvent) => {
-      if (!started) setStarted(true);
+      if (!startedRef.current) { setStarted(true); startedRef.current = true; }
       ensureAudio();
       for (const t of Array.from(e.changedTouches)) {
         const rect = canvas.getBoundingClientRect();
@@ -518,7 +519,7 @@ export default function ZombieFPS() {
       if (!pausedRef.current && !gameOverRef.current) {
         // Movement (keyboard OR mobile joystick)
         const running = sprintRef.current || keys["ShiftLeft"] || keys["ShiftRight"];
-        let moveSpeed = SETTINGS.baseMoveSpeed * (running ? SETTINGS.sprintMultiplier : 1);
+        const moveSpeed = SETTINGS.baseMoveSpeed * (running ? SETTINGS.sprintMultiplier : 1);
         forward.set(0, 0, -1).applyQuaternion(camera.quaternion).setY(0).normalize();
         right.copy(new THREE.Vector3().crossVectors(forward, up)).normalize();
 
@@ -605,19 +606,21 @@ export default function ZombieFPS() {
       canvas.removeEventListener("touchmove", onTouchMove);
       renderer.dispose();
       scene.traverse((obj) => {
-        const mesh = obj as THREE.Mesh;
-        const m = mesh.material as THREE.Material | THREE.Material[] | undefined;
-        const g = (mesh as any).geometry as THREE.BufferGeometry | undefined;
-        if (Array.isArray(m)) m.forEach((mm) => mm.dispose?.());
-        else m?.dispose?.();
-        g?.dispose?.();
+        if ((obj as THREE.Mesh).isMesh) {
+          const mesh = obj as THREE.Mesh;
+          const m = mesh.material as THREE.Material | THREE.Material[] | undefined;
+          const g = mesh.geometry as THREE.BufferGeometry | undefined;
+          if (Array.isArray(m)) m.forEach((mm) => mm.dispose?.());
+          else m?.dispose?.();
+          g?.dispose?.();
+        }
       });
     };
   }, []);
 
 
   const startGame = () => {
-    setStarted(true);
+    setStarted(true); startedRef.current = true;
     ensureAudio();
     const el = wrapRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
     if (!el) return;

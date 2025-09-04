@@ -129,7 +129,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ inline = false }) => {
   const playPause = () => {
     const p = playerRef.current;
     if (!p) return;
-    (isPlaying ? p.pauseVideo() : p.playVideo());
+    if (isPlaying) p.pauseVideo(); else p.playVideo();
   };
   const seek = (v: number) => {
     const p = playerRef.current;
@@ -183,6 +183,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ inline = false }) => {
         shadow-[0_10px_40px_rgba(0,0,0,.55)]
         bg-[radial-gradient(120%_100%_at_50%_0%,rgba(231,29,54,.18),transparent_40%),_linear-gradient(180deg,#0b0b0d,#120e10)]
       "
+      style={inline ? { display: "inline-block" } : undefined}
     >
       {/* Header mini-clock + title */}
       <div className="px-4 pt-3 pb-2 flex items-center gap-3">
