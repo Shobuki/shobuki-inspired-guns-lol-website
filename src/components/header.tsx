@@ -234,8 +234,11 @@ export default function Header() {
         data-lenis-prevent
       >
         <button
-          onClick={() => setShowZombie(false)}
-          className="absolute top-4 right-4 px-3 py-1.5 rounded-md bg-white/90 text-black font-semibold hover:bg-white"
+          onClick={() => {
+            try { (document as any).exitPointerLock?.(); } catch {}
+            setShowZombie(false);
+          }}
+          className="absolute top-4 right-4 z-[1000] px-3 py-1.5 rounded-md bg-white/90 text-black font-semibold hover:bg-white"
           aria-label="Close"
         >
           Close
