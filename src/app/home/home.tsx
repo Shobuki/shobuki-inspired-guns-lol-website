@@ -103,7 +103,9 @@ export default function Page() {
             >
               <div className={`h-full ${CARD_MIN_H} rounded-2xl bg-black/40 ring-1 ring-white/10 shadow-lg shadow-black/50 p-4 overflow-hidden`}>
                 <div className="h-full w-full grid place-items-center">
-  <ClockSteampunk size="min(100%, clamp(220px, 30vw, 420px))" />
+  <div className="w-full md:w-[min(100%,420px)] lg:w-[min(100%,520px)]">
+    <ClockSteampunk size="100%" />
+  </div>
 </div>
               </div>
             </motion.div>
@@ -199,17 +201,15 @@ function SocialLink({ href, bg, text, sub, username, children }: {
         <span className="font-semibold leading-tight">{text}</span>
         {(sub || username) ? (
           <span className="text-xs text-white/70 leading-tight">
-            {sub}{username ? ` Â· ${username}` : ""}
+            {sub && username ? `${sub}: ${username}` : (sub || username || "")}
           </span>
         ) : null}
       </span>
 
-      <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-white/80">â†—</span>
+      <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-white/80">�+-</span>
     </Link>
   );
 }
-
-/* === Kotak ikon seragam (ukuran, ring, center) === */
 function IconBox({ children }: { children: React.ReactNode }) {
   return (
     <span className="shrink-0 inline-grid place-items-center size-12 rounded-xl bg-black/25 ring-1 ring-white/15 shadow-inner text-white p-2.5">
@@ -247,6 +247,8 @@ function SpotifyIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 // (removed unused DiscordIcon)
+
+
 
 
 
