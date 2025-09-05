@@ -266,26 +266,7 @@ export default function ZombieFPS() {
     const canvas = renderer.domElement as HTMLCanvasElement;
     canvas.tabIndex = 0; canvas.style.outline = "none"; canvas.oncontextmenu = e => e.preventDefault();
 
-    const onTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-      const t = e.touches[0];
-      touchStartRef.current = { x: t.clientX, y: t.clientY };
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      if (!touchStartRef.current) return;
-      const t = e.touches[0];
-      const dx = t.clientX - touchStartRef.current.x;
-      const dy = t.clientY - touchStartRef.current.y;
-      yaw -= dx * 0.005; // geser kiri/kanan
-      pitch -= dy * 0.005; // geser atas/bawah
-      pitch = Math.max(-Math.PI / 2 + 0.02, Math.min(Math.PI / 2 - 0.02, pitch)); // clamp
-      touchStartRef.current = { x: t.clientX, y: t.clientY };
-    };
-
-    canvas.addEventListener("touchstart", onTouchStart, { passive: false });
-    canvas.addEventListener("touchmove", onTouchMove, { passive: false });
+    // Note: look control is handled in handleTouch* below (right side)
 
     const setPaused = (v: boolean) => { pausedRef.current = v; };
     const onPointerLockChange = () => {
@@ -617,8 +598,7 @@ export default function ZombieFPS() {
       canvas.removeEventListener("touchmove", handleTouchMove);
       canvas.removeEventListener("touchend", handleTouchEnd);
       canvas.removeEventListener("touchcancel", handleTouchEnd);
-      canvas.removeEventListener("touchstart", onTouchStart);
-      canvas.removeEventListener("touchmove", onTouchMove);
+      // (no-op: simple onTouch* removed)
       window.removeEventListener("zfps-shoot", onShootEvt as EventListener);
       window.removeEventListener("zfps-reload", onReloadEvt as EventListener);
       renderer.dispose();
@@ -708,7 +688,7 @@ export default function ZombieFPS() {
       <div ref={wrapRef} className="relative z-0 w-full h-full" />
 
       {/* HUD */}
-      <div className="absolute inset-0 text-white font-mono z-[100]">
+      <div className="absolute inset-0 text-white font-mono z-[100] pointer-events-none">
         {/* Stats */}
         <div className="pointer-events-none absolute top-3 left-3 text-xs sm:text-sm bg-black/40 px-3 py-2 rounded-md backdrop-blur">
           <div>Wave: <b>{wave}</b></div>
@@ -784,7 +764,7 @@ export default function ZombieFPS() {
             {/* Left joystick visual (simple circle) */}
             <div className="absolute left-3 bottom-3 w-28 h-28 rounded-full border border-white/30 bg-white/5 pointer-events-none" />
             {/* Right action buttons */}
-            <div className="absolute right-3 bottom-3 flex flex-col gap-2">
+            <div className="absolute right-3 bottom-3 flex flex-col gap-2 pointer-events-auto">
               <button
                 onTouchStart={() => runToggle(true)}
                 onTouchEnd={() => runToggle(false)}
