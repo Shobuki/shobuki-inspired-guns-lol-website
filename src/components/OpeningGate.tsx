@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const STORAGE_KEY = "kurumi-gate-entered.v1"; // jika dulu pernah tersimpan
@@ -10,6 +10,7 @@ export default function OpeningGate({
 }: { remember?: boolean }) {
   const [show, setShow] = useState(false);
   const [closing, setClosing] = useState(false);
+  const prevOverflowRef = useRef<string>("");
 
   // SELALU TAMPIL: hapus flag lama (kalau ada), lalu tampilkan
   useEffect(() => {
@@ -19,12 +20,22 @@ export default function OpeningGate({
       } catch {}
     }
     setShow(true);
-    const prev = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.documentElement.style.overflow = prev;
-    };
   }, [remember]);
+
+  // Lock scroll only while the gate is visible
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const el = document.documentElement;
+    if (show) {
+      prevOverflowRef.current = el.style.overflow;
+      el.style.overflow = "hidden";
+    } else {
+      el.style.overflow = prevOverflowRef.current;
+    }
+    return () => {
+      el.style.overflow = prevOverflowRef.current;
+    };
+  }, [show]);
 
   const dismiss = useCallback(() => {
     if (closing) return;
