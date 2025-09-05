@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React from "react";
 import Lenis from "lenis";
 import ClockSteampunk from "@/components/clock";
@@ -101,12 +101,10 @@ export default function Page() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className={`h-full ${CARD_MIN_H} rounded-2xl bg-black/40 ring-1 ring-white/10 shadow-lg shadow-black/50 p-4`}>
+              <div className={`h-full ${CARD_MIN_H} rounded-2xl bg-black/40 ring-1 ring-white/10 shadow-lg shadow-black/50 p-4 overflow-hidden`}>
                 <div className="h-full w-full grid place-items-center">
-                  <div className="w-72 md:w-80 lg:w-96">
-                    <ClockSteampunk size="100%" />
-                  </div>
-                </div>
+  <ClockSteampunk size="min(100%, clamp(220px, 30vw, 420px))" />
+</div>
               </div>
             </motion.div>
 
@@ -201,12 +199,12 @@ function SocialLink({ href, bg, text, sub, username, children }: {
         <span className="font-semibold leading-tight">{text}</span>
         {(sub || username) ? (
           <span className="text-xs text-white/70 leading-tight">
-            {sub}{username ? ` · ${username}` : ""}
+            {sub}{username ? ` Â· ${username}` : ""}
           </span>
         ) : null}
       </span>
 
-      <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-white/80">↗</span>
+      <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-white/80">â†—</span>
     </Link>
   );
 }
@@ -220,7 +218,7 @@ function IconBox({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* Roblox — diamond tanpa rotate; tanpa width/height atribut */
+/* Roblox â€” diamond tanpa rotate; tanpa width/height atribut */
 function RobloxIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" role="img" aria-label="Roblox" fill="currentColor" className="block" {...props}>
@@ -230,7 +228,7 @@ function RobloxIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-/* Steam — simple & rapi; tanpa width/height atribut */
+/* Steam â€” simple & rapi; tanpa width/height atribut */
 function SteamIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" role="img" aria-label="Steam" fill="currentColor" className="block" {...props}>
@@ -239,7 +237,7 @@ function SteamIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-/* Spotify — resmi, tanpa width/height atribut */
+/* Spotify â€” resmi, tanpa width/height atribut */
 function SpotifyIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" role="img" aria-label="Spotify" fill="currentColor" className="block" {...props}>
@@ -249,3 +247,6 @@ function SpotifyIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 // (removed unused DiscordIcon)
+
+
+
