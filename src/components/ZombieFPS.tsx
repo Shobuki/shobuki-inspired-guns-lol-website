@@ -267,11 +267,13 @@ export default function ZombieFPS() {
     canvas.tabIndex = 0; canvas.style.outline = "none"; canvas.oncontextmenu = e => e.preventDefault();
 
     const onTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
       const t = e.touches[0];
       touchStartRef.current = { x: t.clientX, y: t.clientY };
     };
 
     const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
       if (!touchStartRef.current) return;
       const t = e.touches[0];
       const dx = t.clientX - touchStartRef.current.x;
@@ -362,6 +364,7 @@ export default function ZombieFPS() {
       leftStart: { x: 0, y: 0 }, rightStart: { x: 0, y: 0 },
     };
     const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
       if (!startedRef.current) { setStarted(true); startedRef.current = true; }
       ensureAudio();
       for (const t of Array.from(e.changedTouches)) {
@@ -378,6 +381,7 @@ export default function ZombieFPS() {
       setPaused(false); // mobile: start unpaused
     };
     const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
       for (const t of Array.from(e.changedTouches)) {
         const rect = canvas.getBoundingClientRect();
         const x = t.clientX - rect.left, y = t.clientY - rect.top;
@@ -402,6 +406,7 @@ export default function ZombieFPS() {
       }
     };
     const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
       for (const t of Array.from(e.changedTouches)) {
         if (t.identifier === touchState.leftId) {
           touchState.leftId = -1; moveVecRef.current = { x: 0, y: 0 };
@@ -477,6 +482,16 @@ export default function ZombieFPS() {
         }
       }
     };
+
+    // Bridge: allow mobile HUD buttons to trigger shoot/reload
+    const onShootEvt = (ev: Event) => {
+      const ce = ev as CustomEvent<{ now?: number }>;
+      const now = ce.detail?.now ?? performance.now();
+      tryShoot(now);
+    };
+    const onReloadEvt = () => { startReload(); };
+    window.addEventListener("zfps-shoot", onShootEvt as EventListener);
+    window.addEventListener("zfps-reload", onReloadEvt as EventListener);
 
     // Movement helpers
     const forward = new THREE.Vector3();
@@ -604,6 +619,8 @@ export default function ZombieFPS() {
       canvas.removeEventListener("touchcancel", handleTouchEnd);
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("zfps-shoot", onShootEvt as EventListener);
+      window.removeEventListener("zfps-reload", onReloadEvt as EventListener);
       renderer.dispose();
       scene.traverse((obj) => {
         if ((obj as THREE.Mesh).isMesh) {
@@ -687,7 +704,7 @@ export default function ZombieFPS() {
 
   // Minimal HUD (including mobile controls)
   return (
-    <div className="relative w-full h-[640px] md:h-[720px] select-none rounded-2xl overflow-hidden bg-black/80 ring-1 ring-white/10">
+    <div className="relative w-full h-[640px] md:h-[720px] select-none touch-none rounded-2xl overflow-hidden bg-black/80 ring-1 ring-white/10">
       <div ref={wrapRef} className="relative z-0 w-full h-full" />
 
       {/* HUD */}

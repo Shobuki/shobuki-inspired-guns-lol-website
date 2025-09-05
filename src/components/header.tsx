@@ -13,9 +13,16 @@ export default function Header() {
   const [showZombie, setShowZombie] = useState(false);
   // Lock background scroll when modal open
   useEffect(() => {
-    const prev = document.body.style.overflow;
-    if (showZombie) document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    if (showZombie) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
   }, [showZombie]);
   // batas vertikal merah (panel merah tidak boleh melewati ini)
   const dividerX = "56%"           // bisa ganti ke "600px" kalau mau fixed
@@ -197,7 +204,7 @@ export default function Header() {
     {/* Modal: Zombie FPS */}
     {showZombie && (
       <div
-        className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm"
+        className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm touch-none overflow-hidden"
         aria-modal="true"
         role="dialog"
         data-lenis-prevent
